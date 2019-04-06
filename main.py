@@ -1,18 +1,31 @@
 import tcod as libtcod
 
+from entity import Entity
+from map_objects.game_map import GameMap
 from inputHandlers import handle_keys
+from renderFunctions import render_all, clear_all
 
 def main():
     SCREEN_WIDTH = 80
     SCREEN_HEIGHT = 50
+    MAP_WIDTH = 80
+    MAP_HEIGHT = 45
 
-    player_x = int(SCREEN_WIDTH / 2)
-    player_y = int(SCREEN_HEIGHT / 2)
+    colors = {
+        'dark_wall': libtcod.color.Color(0, 0, 100),
+        'dark_ground': libtcod.color.Color(50,50,150)
+    }
 
-    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GRAYSCALE|libtcod.FONT_LAYOUT_TCOD)
+    player = Entity(int(SCREEN_WIDTH / 2), int(SCREEN_HEIGHT / 2), '@', libtcod.white)
+
+    entities = [player]
+
+    libtcod.console_set_custom_font('arial12x12.png', libtcod.FONT_TYPE_GRAYSCALE|libtcod.FONT_LAYOUT_TCOD)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'RL - 2019', False)
 
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+    game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
 
     key = libtcod.Key()
     mouse = libtcod.Mouse()
@@ -20,13 +33,11 @@ def main():
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
 
-        libtcod.console_set_default_foreground(con, libtcod.white)
-        libtcod.console_put_char(con, player_x, player_y, '@', libtcod.BKGND_NONE)
-        libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+        render_all(con, game_map, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors)
+        
         libtcod.console_flush()
 
-        libtcod.console_put_char(con, player_x, player_y, ' ', libtcod.BKGND_NONE)
-
+        clear_all(con, entities)
         action = handle_keys(key)
 
         move = action.get('move')
@@ -35,8 +46,8 @@ def main():
 
         if move:
             dx, dy = move
-            player_x += dx
-            player_y += dy
+            if not game_map.is_blocked(player.x + dx, player.y + dy):
+                player.move(dx, dy)
 
         if exit:
             return True 
