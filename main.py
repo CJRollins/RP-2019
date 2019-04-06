@@ -4,6 +4,7 @@ from entity import Entity
 from map_objects.game_map import GameMap
 from inputHandlers import handle_keys
 from renderFunctions import render_all, clear_all
+from fov_functions import initialize_fov, recompute_fov
 
 def main():
     SCREEN_WIDTH = 80
@@ -15,9 +16,16 @@ def main():
     ROOM_MIN_SIZE = 6
     MAX_ROOMS = 30
 
+    FOV_ALGORITHM = 0
+    FOV_LIGHT_WALLS = True
+    FOV_RADIUS = 10
+
     colors = {
         'dark_wall': libtcod.color.Color(0, 0, 100),
-        'dark_ground': libtcod.color.Color(50,50,150)
+        'dark_ground': libtcod.color.Color(50,50,150),
+        'light_wall': libtcod.color.Color(130, 110, 50),
+        'light_ground': libtcod.color.Color(200, 180, 50)
+    
     }
 
     player = Entity(int(SCREEN_WIDTH / 2), int(SCREEN_HEIGHT / 2), '@', libtcod.white)
@@ -32,13 +40,22 @@ def main():
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
     game_map.make_map(MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE, MAP_WIDTH, MAP_HEIGHT, player)
 
+    fov_recompute = True
+
+    fov_map = initialize_fov(game_map)
+
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
 
-        render_all(con, game_map, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors)
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGORITHM)
+
+        render_all(con, game_map, fov_map, fov_recompute, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors)
+        
+        fov_recompute = False
         
         libtcod.console_flush()
 
@@ -53,6 +70,8 @@ def main():
             dx, dy = move
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 player.move(dx, dy)
+                
+                fov_recompute = True
 
         if exit:
             return True 
