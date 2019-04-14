@@ -1,1 +1,3 @@
-__pycache__
+# Untracked files:
+__pycache__/
+*.pyc
