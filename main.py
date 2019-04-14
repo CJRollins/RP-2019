@@ -13,8 +13,12 @@ def main():
     SCREEN_WIDTH = 80
     SCREEN_HEIGHT = 50
     MAP_WIDTH = 80
-    MAP_HEIGHT = 45
+    MAP_HEIGHT = 43
     
+    BAR_WIDTH = 20
+    PANEL_HEIGHT = 7
+    PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+
     ROOM_MAX_SIZE = 10
     ROOM_MIN_SIZE = 6
     MAX_ROOMS = 30
@@ -41,6 +45,7 @@ def main():
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'RL - 2019', False,libtcod.RENDERER_SDL2)
 
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
     game_map.make_map(MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE, MAP_WIDTH, MAP_HEIGHT, player, entities, MAX_MONSTERS_PER_ROOM)
@@ -60,7 +65,7 @@ def main():
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGORITHM)
 
-        render_all(con, game_map, fov_map, fov_recompute, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors, player)
+        render_all(con, panel, game_map, fov_map, fov_recompute, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors, player, BAR_WIDTH, PANEL_HEIGHT, PANEL_Y)
         
         fov_recompute = False
         
