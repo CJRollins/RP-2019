@@ -1,16 +1,28 @@
 import tcod as libtcod
 
-def render_all(con, game_map, fov_map, fov_recompute, entities, screen_width, screen_height, colors):
+from enum import Enum
+
+class RenderOrder(Enum):
+        CORPSE = 1
+        ITEM = 2
+        ACTOR = 3
+
+def render_all(con, game_map, fov_map, fov_recompute, entities, screen_width, screen_height, colors, player):
     
-    if fov_recompute:
-        #Draw tiles in map
-        draw_map(con, game_map, fov_map, colors)
+        if fov_recompute:
+                #Draw tiles in map
+                draw_map(con, game_map, fov_map, colors)
 
-    # Draw all entities in the list
-    for entity in entities:
-        draw_entity(con, entity, fov_map)
+        entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
 
-    libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0,0)
+        # Draw all entities in the list
+        for entity in entities_in_render_order:
+                draw_entity(con, entity, fov_map)
+
+        libtcod.console_set_default_foreground(con, libtcod.white)
+        libtcod.console_print_ex(con, 1, screen_height -2, libtcod.BKGND_NONE, libtcod.LEFT, 'HP: {0:02}/{1:02}' . format(player.fighter.hp, player.fighter.max_hp))
+
+        libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0,0)
 
 def draw_map(con, game_map, fov_map, colors):
         for y in range(game_map.height):
