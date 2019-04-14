@@ -1,7 +1,3 @@
-__pycache__
-venv
-env
-.pytest_cache
-.coverage
-
+# Untracked files:
 *.pyc
+__pycache__/inputHandlers.cpython-37.pyc
