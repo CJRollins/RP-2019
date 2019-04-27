@@ -7,7 +7,7 @@ from map_objects.game_map import GameMap
 from gameStates import GameStates
 from inputHandlers import handle_keys
 from renderFunctions import render_all, clear_all, RenderOrder
-from fovFunctions import initialize_fov, recompute_fov
+from fov_functions import initialize_fov, recompute_fov
 from gameMessages import MessageLog
 
 def main():
