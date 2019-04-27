@@ -7,14 +7,23 @@ from map_objects.game_map import GameMap
 from gameStates import GameStates
 from inputHandlers import handle_keys
 from renderFunctions import render_all, clear_all, RenderOrder
-from fov_functions import initialize_fov, recompute_fov
+from fovFunctions import initialize_fov, recompute_fov
+from gameMessages import MessageLog
 
 def main():
     SCREEN_WIDTH = 80
     SCREEN_HEIGHT = 50
     MAP_WIDTH = 80
-    MAP_HEIGHT = 45
+    MAP_HEIGHT = 43
     
+    BAR_WIDTH = 20
+    PANEL_HEIGHT = 7
+    PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+
+    MESSAGE_X = BAR_WIDTH + 2
+    MESSAGE_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
+    MESSAGE_HEIGHT = PANEL_HEIGHT - 1
+
     ROOM_MAX_SIZE = 10
     ROOM_MIN_SIZE = 6
     MAX_ROOMS = 30
@@ -41,6 +50,7 @@ def main():
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'RL - 2019', False,libtcod.RENDERER_SDL2)
 
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
     game_map.make_map(MAX_ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE, MAP_WIDTH, MAP_HEIGHT, player, entities, MAX_MONSTERS_PER_ROOM)
@@ -48,6 +58,8 @@ def main():
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
+
+    message_log = MessageLog(MESSAGE_X, MESSAGE_WIDTH, MESSAGE_HEIGHT)
 
     key = libtcod.Key()
     mouse = libtcod.Mouse()
@@ -60,7 +72,7 @@ def main():
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, FOV_RADIUS, FOV_LIGHT_WALLS, FOV_ALGORITHM)
 
-        render_all(con, game_map, fov_map, fov_recompute, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors, player)
+        render_all(con, panel, game_map, fov_map, fov_recompute, message_log, entities, SCREEN_WIDTH, SCREEN_HEIGHT, colors, player, BAR_WIDTH, PANEL_HEIGHT, PANEL_Y)
         
         fov_recompute = False
         
@@ -103,7 +115,7 @@ def main():
             dead_entity = player_turn_result.get('dead')
 
             if message:
-                print(message)
+                message_log.add_message(message)
             
             if dead_entity:
                 if dead_entity == player:
@@ -111,7 +123,7 @@ def main():
                 else:
                     message = kill_monster(dead_entity)
                 
-                print(message)
+                message_log.add_message(message)
 
         if gameState == GameStates.ENEMY_TURN:
             for entity in entities:
@@ -123,7 +135,7 @@ def main():
                         dead_entity = enemy_turn_result.get('dead')
 
                         if message:
-                            print(message)
+                            message_log.add_message(message)
                         
                         if dead_entity:
                             if dead_entity == player:
@@ -131,7 +143,7 @@ def main():
                             else:
                                 message = kill_monster(dead_entity)
 
-                            print(message)
+                            message_log.add_message(message)
 
                             if gameState == GameStates.PLAYER_DEAD:
                                 break
