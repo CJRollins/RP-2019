@@ -186,21 +186,21 @@ def main():
             if item_added:
                 entities.remove(item_added)
 
-                game_state = GameStates.ENEMY_TURN
+                gameState = GameStates.ENEMY_TURN
 
             if item_consumed:
                 gameState = GameStates.ENEMY_TURN
 
             if targeting:
                 previous_game_state = GameStates.PLAYERS_TURN
-                game_state = GameStates.TARGETING
+                gameState = GameStates.TARGETING
 
                 targeting_item = targeting
 
                 message_log.add_message(targeting_item.item.targeting_message)
 
             if targeting_cancelled:
-                game_state = previous_game_state
+                gameState = previous_game_state
 
                 message_log.add_message(Message('Targeting cancelled'))
             if item_dropped:
